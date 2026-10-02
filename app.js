@@ -207,16 +207,7 @@
   }
 
   /* ================================================================ HOME === */
-  // lead with the works that currently have real images embedded
-  var deckOrder = (function () {
-    var lead = ['starry-night', 'great-wave', 'the-scream'];
-    var ids = DATA.map(function (p) { return p.id; });
-    var head = [];
-    lead.forEach(function (id) { var k = ids.indexOf(id); if (k > -1) head.push(k); });
-    var rest = [];
-    for (var i = 0; i < DATA.length; i++) if (head.indexOf(i) < 0) rest.push(i);
-    return head.concat(rest);
-  })();
+  var deckOrder = DATA.map(function (_, i) { return i; });
 
   function viewHome() {
     var node = h(
@@ -250,15 +241,19 @@
     car.el = carEl; car.meta = metaEl; car.slots = [];
     carEl.innerHTML = '';
     var H = carEl.clientHeight || 520;
+    var W = carEl.clientWidth || 380;
     car.H = H;
-    car.step = Math.max(84, Math.round(H * 0.205));          // vertical distance per card
+    // uniform card height; the widest painting still fits the frame
+    var ch = Math.max(150, Math.min(Math.round(H * 0.42), Math.round((W * 0.9) / 1.6)));
+    carEl.style.setProperty('--ch', ch + 'px');
+    car.step = Math.max(84, Math.round(ch * 0.52));          // vertical distance per card
     car.pad = Math.max(0, Math.round((H - car.step) / 2));   // lets first/last reach centre
 
     carEl.appendChild(h('<div class="spacer" style="height:' + car.pad + 'px"></div>'));
     deckOrder.forEach(function (di, i) {
       var p = DATA[di];
       var slot = h('<div class="slot" style="height:' + car.step + 'px"></div>');
-      var card = h('<div class="card">' + artHTML(p,
+      var card = h('<div class="card" style="--ar:' + (p.ar || 1.4) + '">' + artHTML(p,
         '<button class="heart' + (store.isFav(p.id) ? ' on' : '') + '" aria-label="Save">' +
         icon(store.isFav(p.id) ? 'heartFill' : 'heart') + '</button>') + '</div>');
       slot.appendChild(card);
@@ -352,7 +347,7 @@
 
     detailEl = h(
       '<div class="detail enter">' +
-      '<div class="detail-hero">' + artHTML(p) +
+      '<div class="detail-hero" style="aspect-ratio:' + (p.ar || 1) + '">' + artHTML(p) +
       '<div class="detail-float">' +
       '<button class="round-btn" data-act="back" aria-label="Back">' + icon('back') + '</button>' +
       '<button class="round-btn' + (fav ? ' on' : '') + '" data-act="fav" aria-label="Save">' + icon(fav ? 'heartFill' : 'heart') + '</button>' +

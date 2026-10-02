@@ -228,10 +228,10 @@ img { max-width: 100%; display: block; }
 
 .card {
   position: relative;
-  width: 86%;
-  max-width: 360px;
-  aspect-ratio: 3 / 2;             /* landscape — these are paintings */
-  border-radius: 16px;
+  height: var(--ch, 210px);              /* uniform height keeps the stack even */
+  width: calc(var(--ch, 210px) * var(--ar, 1.4));  /* width follows each painting's shape */
+  max-width: 94%;
+  border-radius: 14px;
   overflow: hidden;
   background: var(--surface-2);
   box-shadow: 0 22px 46px -20px var(--shadow);
