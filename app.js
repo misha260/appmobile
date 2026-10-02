@@ -313,7 +313,7 @@
       card.style.transform = 'translateY(' + ty.toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
       card.style.opacity = op.toFixed(2);
       card.style.zIndex = String(100 - Math.round(ad * 10));
-      card.style.filter = 'brightness(' + (1 - Math.min(ad, 3) * 0.1).toFixed(2) + ')';
+      card.style.filter = 'blur(' + (Math.min(ad, 3) * 2.2).toFixed(2) + 'px) brightness(' + (1 - Math.min(ad, 3) * 0.1).toFixed(2) + ')';
     }
   }
 
