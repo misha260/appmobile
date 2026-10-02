@@ -207,7 +207,16 @@
   }
 
   /* ================================================================ HOME === */
-  var deckOrder = DATA.map(function (_, i) { return i; });
+  // lead with the works that currently have real images embedded
+  var deckOrder = (function () {
+    var lead = ['starry-night', 'great-wave', 'the-scream'];
+    var ids = DATA.map(function (p) { return p.id; });
+    var head = [];
+    lead.forEach(function (id) { var k = ids.indexOf(id); if (k > -1) head.push(k); });
+    var rest = [];
+    for (var i = 0; i < DATA.length; i++) if (head.indexOf(i) < 0) rest.push(i);
+    return head.concat(rest);
+  })();
 
   function viewHome() {
     var node = h(
