@@ -116,7 +116,9 @@
   }
 
   /* =============================================================== ROUTER == */
-  var screen, stage, detailEl = null;
+  var screen, stage, appEl, detailEl = null;
+  var slideDir = 0, swipeTs = 0;
+  function swipeGuard() { return Date.now() - swipeTs < 450; }
 
   function go(hash) { if (location.hash !== hash) location.hash = hash; else route(); }
 
@@ -140,7 +142,8 @@
 
   function mountScreen(node) {
     screen.innerHTML = '';
-    node.classList.add('view-in');
+    node.classList.add(slideDir > 0 ? 'slide-r' : slideDir < 0 ? 'slide-l' : 'view-in');
+    slideDir = 0;
     screen.appendChild(node);
     screen.scrollTop = 0;
     hydrateArt(node);
@@ -150,9 +153,9 @@
   function buildTabbar() {
     var bar = qs('#tabbar');
     bar.innerHTML =
-      '<button class="tab" data-go="#/saved">' + icon('heart') + '<span>Favorite</span></button>' +
-      '<button class="tab center" data-go="#/home">' + icon('home') + '<span>Home</span></button>' +
-      '<button class="tab" data-go="#/me">' + icon('user') + '<span>Profile</span></button>';
+      '<button class="tab" data-go="#/saved">Favorite</button>' +
+      '<button class="tab" data-go="#/home">Home</button>' +
+      '<button class="tab" data-go="#/me">Profile</button>';
     bar.addEventListener('click', function (e) {
       var b = e.target.closest('[data-go]');
       if (b) { haptic(6); go(b.getAttribute('data-go')); }
@@ -164,16 +167,51 @@
     for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('active', i === map[active]);
   }
 
+  function buildTopbar() {
+    qs('#topbar').innerHTML =
+      '<span class="logo" role="img" aria-label="Gallera">' +
+      '<svg viewBox="0 0 40 34" width="40" height="34" fill="currentColor" aria-hidden="true">' +
+      '<rect x="7" y="2" width="26" height="7" rx="3.5"/>' +
+      '<rect x="2" y="13.5" width="36" height="8" rx="4"/>' +
+      '<rect x="11" y="25" width="18" height="7" rx="3.5"/>' +
+      '</svg></span>';
+  }
+
+  // swipe left / right between the three main tabs
+  function attachPager(el) {
+    var sx = 0, sy = 0, t0 = 0, on = false, lock = null;
+    var order = ['saved', 'home', 'me'];
+    function seg() { var s = location.hash.replace(/^#\/?/, '').split('/')[0]; return s || 'home'; }
+    el.addEventListener('pointerdown', function (e) {
+      if (detailEl || order.indexOf(seg()) < 0) { on = false; return; }
+      sx = e.clientX; sy = e.clientY; t0 = Date.now(); lock = null; on = true;
+    });
+    el.addEventListener('pointermove', function (e) {
+      if (!on || lock) return;
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      if (Math.abs(dx) > 16 && Math.abs(dx) > Math.abs(dy) * 1.4) lock = 'h';
+      else if (Math.abs(dy) > 14) { lock = 'v'; on = false; }
+    });
+    function fin(e) {
+      if (!on) return; on = false;
+      if (lock !== 'h') return;
+      swipeTs = Date.now();
+      var dx = (e.clientX || sx) - sx, dt = Math.max(Date.now() - t0, 1);
+      if (Math.abs(dx) < 55 && Math.abs(dx) / dt < 0.4) return;
+      var i = order.indexOf(seg()), dir = dx < 0 ? 1 : -1, ni = i + dir;
+      if (ni < 0 || ni >= order.length) return;
+      slideDir = dir; haptic(8); go('#/' + order[ni]);
+    }
+    el.addEventListener('pointerup', fin);
+    el.addEventListener('pointercancel', function () { on = false; });
+  }
+
   /* ================================================================ HOME === */
   var deckOrder = DATA.map(function (_, i) { return i; });
 
   function viewHome() {
     var node = h(
       '<div class="home">' +
-      '<div class="brandbar">' +
-      '<div class="wordmark">Gallera<span class="dot">.</span></div>' +
-      '<button class="iconbtn" data-act="shuffle" aria-label="Shuffle">' + icon('shuffle') + '</button>' +
-      '</div>' +
       '<div class="carousel" id="carousel"></div>' +
       '<div class="deck-meta" id="deckMeta"></div>' +
       '<div class="deck-cta">' +
@@ -181,16 +219,6 @@
       '</div>' +
       '</div>'
     );
-    node.querySelector('[data-act="shuffle"]').addEventListener('click', function () {
-      haptic(10);
-      for (var i = deckOrder.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1)), t = deckOrder[i];
-        deckOrder[i] = deckOrder[j]; deckOrder[j] = t;
-      }
-      car.active = 0;
-      buildCarousel(node.querySelector('#carousel'), node.querySelector('#deckMeta'), 0);
-      toast('Reshuffled', 'shuffle');
-    });
     // build after mount so the carousel height is known
     requestAnimationFrame(function () {
       buildCarousel(node.querySelector('#carousel'), node.querySelector('#deckMeta'), Math.min(car.active, DATA.length - 1));
@@ -228,6 +256,7 @@
       (function (p, card, i) {
         card.querySelector('.heart').addEventListener('click', function (e) {
           e.stopPropagation();
+          if (swipeGuard()) return;
           var on = store.toggleFav(p.id);
           var hb = card.querySelector('.heart');
           hb.classList.toggle('on', on); hb.innerHTML = icon(on ? 'heartFill' : 'heart');
@@ -235,6 +264,7 @@
           haptic(12); toast(on ? 'Saved to Favorite' : 'Removed', 'heart');
         });
         card.addEventListener('click', function () {
+          if (swipeGuard()) return;
           if (i === car.active) { haptic(6); go('#/art/' + p.id); }
           else scrollToIndex(i);
         });
@@ -332,7 +362,7 @@
       '</div></div></div>'
     );
 
-    stage.appendChild(detailEl);
+    appEl.appendChild(detailEl);
     hydrateArt(detailEl);
     var hero = detailEl.querySelector('.detail-hero .art-img'); if (hero) hero.classList.add('zoom');
 
@@ -412,7 +442,7 @@
         '<div class="cap"><div class="t">' + esc(p.title) + '</div><div class="a">' + esc(p.artist) + '</div></div>' +
         '</button>'
       );
-      tile.addEventListener('click', function () { haptic(6); go('#/art/' + id); });
+      tile.addEventListener('click', function () { if (swipeGuard()) return; haptic(6); go('#/art/' + id); });
       wrap.appendChild(tile);
     });
     return wrap;
@@ -455,7 +485,7 @@
         '<div class="ct">' + a.items.length + ' work' + (a.items.length === 1 ? '' : 's') + '</div></div>' +
         '<span class="go">' + icon('chev') + '</span></button>'
       );
-      row.addEventListener('click', function () { haptic(6); go('#/album/' + a.id); });
+      row.addEventListener('click', function () { if (swipeGuard()) return; haptic(6); go('#/album/' + a.id); });
       list.appendChild(row);
     });
     var add = h('<button class="addalbum">' + icon('plus') + 'New album</button>');
@@ -492,7 +522,6 @@
   function viewProfile() {
     var node = h(
       '<div>' +
-      '<div class="brandbar"><div class="wordmark">Gallera<span class="dot">.</span></div></div>' +
       '<div class="profile-head"><div class="avatar">A</div>' +
       '<div class="who"><div class="nm">A Connoisseur</div><div class="role">member of the gallery</div></div></div>' +
       '<div class="stats">' +
@@ -561,9 +590,12 @@
   function boot() {
     screen = qs('#screen');
     stage = qs('#stage');
+    appEl = qs('#app');
     store.load();
     applyPrefs();
+    buildTopbar();
     buildTabbar();
+    attachPager(stage);
     window.addEventListener('hashchange', route);
     if (!location.hash) location.replace('#/home');
     route();

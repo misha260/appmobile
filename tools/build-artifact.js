@@ -31,6 +31,7 @@ ${css}
 </style>
 
 <div class="app" id="app">
+  <header class="topbar" id="topbar"></header>
   <div class="stage" id="stage">
     <div class="screen" id="screen"></div>
   </div>
