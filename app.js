@@ -23,6 +23,7 @@
     layers: '<path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/>',
     chev: '<path d="M9 5l7 7-7 7"/>',
     swipe: '<path d="M8 11V6.5a1.8 1.8 0 0 1 3.6 0V11"/><path d="M11.6 11V5.5a1.8 1.8 0 0 1 3.6 0V11"/><path d="M15.2 11V7.5a1.8 1.8 0 0 1 3.5 0V15c0 3.6-2.4 6-6 6-2 0-3.4-.7-4.7-2.2L4.5 14c-1-1.2.6-3 1.9-2l1.6 1.4V8a1.8 1.8 0 0 1 3.6 0"/>',
+    swipeV: '<path d="M8 8l4-4 4 4"/><path d="M8 16l4 4 4-4"/><path d="M12 5v14" opacity="0.5"/>',
     expand: '<path d="M4 9V4h5M20 15v5h-5M20 9V4h-5M4 15v5h5"/>',
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
     trash: '<path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/>',
@@ -164,7 +165,6 @@
   }
 
   /* ================================================================ HOME === */
-  var deckPos = 0;
   var deckOrder = DATA.map(function (_, i) { return i; });
 
   function viewHome() {
@@ -174,10 +174,10 @@
       '<div class="wordmark">Gallera<span class="dot">.</span></div>' +
       '<button class="iconbtn" data-act="shuffle" aria-label="Shuffle">' + icon('shuffle') + '</button>' +
       '</div>' +
-      '<div class="deck-wrap"><div class="deck" id="deck"></div></div>' +
+      '<div class="carousel" id="carousel"></div>' +
       '<div class="deck-meta" id="deckMeta"></div>' +
       '<div class="deck-cta">' +
-      '<span class="deck-hint">' + icon('swipe') + 'Swipe · tap to open</span>' +
+      '<span class="deck-hint">' + icon('swipeV') + 'Scroll · tap to open</span>' +
       '</div>' +
       '</div>'
     );
@@ -187,22 +187,19 @@
         var j = Math.floor(Math.random() * (i + 1)), t = deckOrder[i];
         deckOrder[i] = deckOrder[j]; deckOrder[j] = t;
       }
-      deckPos = 0;
-      buildDeck(node.querySelector('#deck'), node.querySelector('#deckMeta'));
+      car.active = 0;
+      buildCarousel(node.querySelector('#carousel'), node.querySelector('#deckMeta'), 0);
       toast('Reshuffled', 'shuffle');
     });
-    // deck builds after mount so sizes are known
+    // build after mount so the carousel height is known
     requestAnimationFrame(function () {
-      buildDeck(node.querySelector('#deck'), node.querySelector('#deckMeta'));
+      buildCarousel(node.querySelector('#carousel'), node.querySelector('#deckMeta'), Math.min(car.active, DATA.length - 1));
     });
     return node;
   }
 
-  function current() { return DATA[deckOrder[((deckPos % DATA.length) + DATA.length) % DATA.length]]; }
-  function at(offset) {
-    var n = DATA.length;
-    return DATA[deckOrder[(((deckPos + offset) % n) + n) % n]];
-  }
+  // carousel state
+  var car = { el: null, meta: null, slots: [], step: 110, H: 0, pad: 0, active: 0, raf: 0 };
 
   function updateMeta(metaEl, p) {
     metaEl.innerHTML =
@@ -212,107 +209,86 @@
     metaEl.classList.remove('swap'); void metaEl.offsetWidth; metaEl.classList.add('swap');
   }
 
-  function buildDeck(deck, metaEl) {
-    deck.innerHTML = '';
-    // draw back-to-front so the top card is last in the DOM
-    var cards = [];
-    for (var d = 2; d >= 0; d--) {
-      var p = at(d);
-      var top = d === 0;
-      var card = h(
-        '<div class="card' + (top ? ' is-top' : '') + '">' +
-        artHTML(p,
-          (top ? '<button class="heart' + (store.isFav(p.id) ? ' on' : '') + '" aria-label="Save">' +
-            icon(store.isFav(p.id) ? 'heartFill' : 'heart') + '</button>' : '')
-        ) + '</div>'
-      );
-      setBase(card, d);
-      deck.appendChild(card);
-      hydrateArt(card);
-      cards.push(card);
-      if (top) attachDrag(card, deck, metaEl, p);
-    }
-    updateMeta(metaEl, current());
-  }
+  function buildCarousel(carEl, metaEl, startIdx) {
+    car.el = carEl; car.meta = metaEl; car.slots = [];
+    carEl.innerHTML = '';
+    var H = carEl.clientHeight || 520;
+    car.H = H;
+    car.step = Math.max(84, Math.round(H * 0.205));          // vertical distance per card
+    car.pad = Math.max(0, Math.round((H - car.step) / 2));   // lets first/last reach centre
 
-  function setBase(card, depth) {
-    var scale = 1 - depth * 0.06;
-    var ty = -depth * 18;
-    card.style.opacity = depth > 1 ? '0.9' : '1';
-    card.style.transform = 'translateY(' + ty + 'px) scale(' + scale + ')';
-    card.style.zIndex = String(10 - depth);
-  }
-
-  function attachDrag(card, deck, metaEl, p) {
-    var startX = 0, startY = 0, dx = 0, dy = 0, dragging = false, busy = false, moved = 0, t0 = 0;
-    var second = card.previousElementSibling; // depth 1
-    var third = second ? second.previousElementSibling : null; // depth 2
-    var heart = card.querySelector('.heart');
-
-    if (heart) heart.addEventListener('click', function (e) {
-      e.stopPropagation();
-      var on = store.toggleFav(p.id);
-      heart.classList.toggle('on', on);
-      heart.innerHTML = icon(on ? 'heartFill' : 'heart');
-      heart.classList.remove('pop'); void heart.offsetWidth; heart.classList.add('pop');
-      haptic(12);
-      toast(on ? 'Saved to Favorite' : 'Removed', 'heart');
+    carEl.appendChild(h('<div class="spacer" style="height:' + car.pad + 'px"></div>'));
+    deckOrder.forEach(function (di, i) {
+      var p = DATA[di];
+      var slot = h('<div class="slot" style="height:' + car.step + 'px"></div>');
+      var card = h('<div class="card">' + artHTML(p,
+        '<button class="heart' + (store.isFav(p.id) ? ' on' : '') + '" aria-label="Save">' +
+        icon(store.isFav(p.id) ? 'heartFill' : 'heart') + '</button>') + '</div>');
+      slot.appendChild(card);
+      (function (p, card, i) {
+        card.querySelector('.heart').addEventListener('click', function (e) {
+          e.stopPropagation();
+          var on = store.toggleFav(p.id);
+          var hb = card.querySelector('.heart');
+          hb.classList.toggle('on', on); hb.innerHTML = icon(on ? 'heartFill' : 'heart');
+          hb.classList.remove('pop'); void hb.offsetWidth; hb.classList.add('pop');
+          haptic(12); toast(on ? 'Saved to Favorite' : 'Removed', 'heart');
+        });
+        card.addEventListener('click', function () {
+          if (i === car.active) { haptic(6); go('#/art/' + p.id); }
+          else scrollToIndex(i);
+        });
+      })(p, card, i);
+      carEl.appendChild(slot);
+      car.slots.push(slot);
+      hydrateArt(slot);
     });
+    carEl.appendChild(h('<div class="spacer" style="height:' + car.pad + 'px"></div>'));
 
-    function down(e) {
-      if (busy) return;
-      dragging = true; moved = 0; t0 = Date.now();
-      startX = e.clientX; startY = e.clientY; dx = 0; dy = 0;
-      card.classList.remove('anim');
-      card.setPointerCapture && card.setPointerCapture(e.pointerId);
-    }
-    function move(e) {
-      if (!dragging) return;
-      dx = e.clientX - startX; dy = e.clientY - startY;
-      moved = Math.max(moved, Math.abs(dx) + Math.abs(dy));
-      var rot = dx * 0.035;
-      card.style.transform = 'translate(' + dx + 'px,' + (dy * 0.34) + 'px) rotate(' + rot + 'deg)';
-      var img = card.querySelector('.art-img');
-      if (img) img.style.transform = 'translateX(' + (dx * -0.04) + 'px)';
-      var prog = Math.min(Math.abs(dx) / 120, 1);
-      if (second) { second.style.transform = 'translateY(' + (-18 + 18 * prog) + 'px) scale(' + (0.94 + 0.06 * prog) + ')'; }
-      if (third) { third.style.transform = 'translateY(' + (-34 + 16 * prog) + 'px) scale(' + (0.88 + 0.06 * prog) + ')'; }
-    }
-    function up(e) {
-      if (!dragging) return;
-      dragging = false;
-      var dt = Date.now() - t0;
-      var vx = Math.abs(dx) / Math.max(dt, 1);
-      // tap → open
-      if (moved < 10 && dt < 350) { haptic(6); go('#/art/' + p.id); return; }
-      var fling = Math.abs(dx) > 95 || (vx > 0.5 && Math.abs(dx) > 40);
-      if (fling) {
-        busy = true;
-        var dir = dx < 0 ? -1 : 1; // left = next
-        card.classList.add('gone');
-        card.style.transform = 'translate(' + (dir * 640) + 'px,' + (dy * 0.5 - 40) + 'px) rotate(' + (dir * 22) + 'deg)';
-        card.style.opacity = '0';
-        if (second) { second.classList.add('anim'); setBase(second, 0); }
-        if (third) { third.classList.add('anim'); setBase(third, 1); }
-        setTimeout(function () {
-          deckPos += (dir === -1 ? 1 : -1);
-          buildDeck(deck, metaEl);
-        }, 360);
-      } else {
-        card.classList.add('anim');
-        setBase(card, 0);
-        var img = card.querySelector('.art-img'); if (img) img.style.transform = '';
-        if (second) { second.classList.add('anim'); setBase(second, 1); }
-        if (third) { third.classList.add('anim'); setBase(third, 2); }
-        setTimeout(function () {
-          card.classList.remove('anim'); if (second) second.classList.remove('anim'); if (third) third.classList.remove('anim');
-        }, 500);
+    carEl.onscroll = onCarScroll;
+    car.active = Math.max(0, Math.min(DATA.length - 1, startIdx || 0));
+    carEl.scrollTop = car.active * car.step;
+    updateTransforms();
+    markActive();
+    updateMeta(metaEl, DATA[deckOrder[car.active]]);
+  }
+
+  function onCarScroll() {
+    if (car.raf) return;
+    car.raf = requestAnimationFrame(function () {
+      car.raf = 0;
+      updateTransforms();
+      var idx = Math.max(0, Math.min(DATA.length - 1, Math.round(car.el.scrollTop / car.step)));
+      if (idx !== car.active) {
+        car.active = idx; markActive();
+        updateMeta(car.meta, DATA[deckOrder[idx]]);
       }
+    });
+  }
+
+  function updateTransforms() {
+    if (!car.el) return;
+    var mid = car.el.scrollTop + car.H / 2;
+    for (var i = 0; i < car.slots.length; i++) {
+      var slot = car.slots[i], card = slot.firstElementChild;
+      var d = (slot.offsetTop + car.step / 2 - mid) / car.step;   // signed distance in cards
+      var ad = Math.min(Math.abs(d), 4);
+      var scale = Math.max(0.5, 1 - ad * 0.14);
+      var op = Math.max(0, 1 - ad * 0.34);
+      var ty = -d * car.step * 0.34;                              // pull neighbours in → stacked overlap
+      card.style.transform = 'translateY(' + ty.toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
+      card.style.opacity = op.toFixed(2);
+      card.style.zIndex = String(100 - Math.round(ad * 10));
+      card.style.filter = 'brightness(' + (1 - Math.min(ad, 3) * 0.1).toFixed(2) + ')';
     }
-    card.addEventListener('pointerdown', down);
-    card.addEventListener('pointermove', move);
-    card.addEventListener('pointerup', up);
-    card.addEventListener('pointercancel', up);
+  }
+
+  function markActive() {
+    for (var i = 0; i < car.slots.length; i++) car.slots[i].classList.toggle('active', i === car.active);
+  }
+
+  function scrollToIndex(i) {
+    if (car.el) car.el.scrollTo({ top: i * car.step, behavior: 'smooth' });
   }
 
   /* ============================================================== DETAIL === */

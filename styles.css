@@ -15,8 +15,8 @@
   --muted: #6e675b;
   --faint: #a79d8c;
   --line: rgba(33, 29, 24, 0.12);
-  --accent: #8d2a1f;          /* oxblood — the single bold note */
-  --accent-soft: rgba(141, 42, 31, 0.10);
+  --accent: #d6281f;          /* red — the brand colour */
+  --accent-soft: rgba(214, 40, 31, 0.10);
   --gold: #a8843f;
   --shadow: rgba(48, 36, 22, 0.22);
   --scrim: rgba(24, 18, 12, 0.46);
@@ -48,8 +48,8 @@
     --muted: #a79d8c;
     --faint: #6f675a;
     --line: rgba(239, 232, 220, 0.14);
-    --accent: #d05c45;
-    --accent-soft: rgba(208, 92, 69, 0.18);
+    --accent: #f24436;
+    --accent-soft: rgba(242, 68, 54, 0.20);
     --gold: #c9a869;
     --shadow: rgba(0, 0, 0, 0.55);
     --scrim: rgba(0, 0, 0, 0.6);
@@ -64,8 +64,8 @@
   --muted: #a79d8c;
   --faint: #6f675a;
   --line: rgba(239, 232, 220, 0.14);
-  --accent: #d05c45;
-  --accent-soft: rgba(208, 92, 69, 0.18);
+  --accent: #f24436;
+  --accent-soft: rgba(242, 68, 54, 0.20);
   --gold: #c9a869;
   --shadow: rgba(0, 0, 0, 0.55);
   --scrim: rgba(0, 0, 0, 0.6);
@@ -183,89 +183,89 @@ img { max-width: 100%; display: block; }
   font-weight: 500;
 }
 
-/* ============================================================= HOME deck == */
+/* ================================================================ HOME === */
 
 .home {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
-.deck-wrap {
+
+/* vertical carousel — scroll up / down; the focused card snaps to centre */
+.carousel {
+  position: relative;
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  perspective: 1200px;
+}
+.carousel::-webkit-scrollbar { display: none; }
+.slot {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 26px 0;
-  perspective: 1400px;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
 }
-.deck {
-  position: relative;
-  width: 100%;
-  max-width: 320px;
-  aspect-ratio: 3 / 4.1;
-}
+.spacer { flex: none; }
 
 .card {
-  position: absolute;
-  inset: 0;
-  border-radius: 20px;
+  position: relative;
+  width: 86%;
+  max-width: 360px;
+  aspect-ratio: 3 / 2;             /* landscape — these are paintings */
+  border-radius: 16px;
   overflow: hidden;
   background: var(--surface-2);
-  box-shadow: 0 18px 40px -16px var(--shadow);
-  will-change: transform;
-  transform-origin: center bottom;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: pan-y;
+  box-shadow: 0 22px 46px -20px var(--shadow);
+  will-change: transform, opacity;
+  cursor: pointer;
+  user-select: none; -webkit-user-select: none;
 }
-.card.is-top { cursor: grab; touch-action: none; }
-.card.is-top:active { cursor: grabbing; }
-.card.anim { transition: transform .5s cubic-bezier(.2,.8,.25,1), opacity .5s ease; }
-.card.gone { transition: transform .45s cubic-bezier(.4,0,.2,1), opacity .4s ease; }
 
-.art {
-  position: absolute;
-  inset: 0;
-}
-/* the fallback colour-field (always drawn; hidden once a photo loads) */
+.art { position: absolute; inset: 0; }
+/* fallback colour-field (always drawn; hidden once a photo loads) */
 .art-field {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(130% 90% at 50% 8%, color-mix(in srgb, var(--c-accent) 36%, transparent), transparent 60%),
+    radial-gradient(130% 120% at 50% 6%, color-mix(in srgb, var(--c-accent) 36%, transparent), transparent 62%),
     linear-gradient(160deg, color-mix(in srgb, var(--c-tone) 82%, #000 0%), color-mix(in srgb, var(--c-tone) 96%, #000 18%));
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 30px;
+  padding: 18px;
   color: #f6f1e6;
 }
 .art-field::after { /* inner mat line */
   content: '';
   position: absolute;
-  inset: 14px;
+  inset: 10px;
   border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 10px;
+  border-radius: 8px;
   pointer-events: none;
 }
 .art-field .ph-title {
   font-family: var(--font-display);
-  font-size: 27px;
+  font-size: 22px;
   line-height: 1.1;
   font-weight: 600;
   text-wrap: balance;
-  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.4);
 }
 .art-field .ph-artist {
   font-family: var(--font-script);
-  font-size: 19px;
-  margin-top: 14px;
+  font-size: 16px;
+  margin-top: 8px;
   color: var(--c-accent);
-  filter: brightness(1.18) saturate(1.02);
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
+  filter: brightness(1.25) saturate(1.05);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
 }
 :root[data-type='modern'] .art-field .ph-artist { font-style: italic; }
 
@@ -280,34 +280,26 @@ img { max-width: 100%; display: block; }
 }
 .art-img.loaded { opacity: 1; }
 
-/* caption plate over the photo on the top card */
-.card .plate {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  padding: 44px 18px 16px;
-  background: linear-gradient(to top, rgba(10, 8, 6, 0.82), transparent);
-  color: #f6f1e6;
-  opacity: 0;
-  transition: opacity .3s ease;
-}
-.card.is-top .plate.show { opacity: 1; }
-.card .plate .y { font-family: var(--font-label); font-size: 11px; letter-spacing: .14em; opacity: .85; }
+/* carousel cards stay clean bands — the work's name shows beneath the deck */
+.card .art-field .ph-title,
+.card .art-field .ph-artist { display: none; }
 
 .card .heart {
   position: absolute;
-  top: 12px; right: 12px;
-  width: 44px; height: 44px;
+  top: 10px; right: 10px;
+  width: 40px; height: 40px;
   display: grid; place-items: center;
   border-radius: 50%;
-  background: rgba(20, 16, 12, 0.32);
+  background: rgba(20, 16, 12, 0.34);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   color: #fff;
   opacity: 0;
+  pointer-events: none;
   transition: opacity .3s ease, transform .2s ease;
 }
-.card.is-top .heart { opacity: 1; }
-.card .heart svg { width: 22px; height: 22px; }
+.slot.active .card .heart { opacity: 1; pointer-events: auto; }
+.card .heart svg { width: 20px; height: 20px; }
 .card .heart.on { color: var(--accent); }
 .card .heart.pop { animation: pop .4s ease; }
 
