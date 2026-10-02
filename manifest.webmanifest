@@ -1,0 +1,16 @@
+{
+  "name": "Gallera — a gallery in your pocket",
+  "short_name": "Gallera",
+  "description": "Flick through masterworks of painting, read their stories, and collect the ones you love.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f2eee5",
+  "theme_color": "#f2eee5",
+  "categories": ["art", "lifestyle", "education"],
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
