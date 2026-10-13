@@ -3,7 +3,7 @@
 **Delivered by 48HourDigital · Version 1.0 · October 2026**
 **Source of truth:** *Pyle USA — Visual Brand Identity Refresh* (Jan 2025, "Visual Brand New" direction only). The "Visual Brand Now" material (source pp. 7–12) and "The Packaging Now" (source p. 62) are deprecated and must not be reproduced.
 
-> **Note (v2.1):** The HTML/PDF slide deck is a streamlined 41-slide brand guide with region-specifics. This file keeps the full long-form reference wording behind it.
+> **Note (v2.3):** The HTML/PDF slide deck is a streamlined 36-slide brand guide (mascot, packaging and sub-brand slides removed) with region-specifics. This file keeps the full long-form reference wording behind it.
 
 ---
 
