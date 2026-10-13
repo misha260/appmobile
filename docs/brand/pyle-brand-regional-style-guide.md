@@ -219,6 +219,7 @@ In any piece of copy, roughly four sentences inform, guide or inspire (Explorer)
 | Max Volume for tips, onboarding and helpful nudges | Max Volume in price claims, legal copy, safety warnings or complaints handling |
 | Clearly label paid partnerships (#ad / "Paid partnership") | Hiding influencer payments or gifted-product relationships |
 | Inclusive casting and language | Jokes about skill level, age, gender, body or accent |
+| Keep Pyle politically neutral in all owned and paid media | Using politicians, political rallies or protest imagery, even organic photos of Pyle products in use |
 
 **Headline bank (approved)**
 - Get Into It!
@@ -501,6 +502,7 @@ Max is a character who embodies the spirit of Pyle's audio innovation and commun
 
 **Never**
 - Stock-looking, over-posed imagery; AI-generated people presented as real customers; images that misrepresent product size, finish or included accessories; or unsafe use (e.g., unsecured marine installs, distracted driving).
+- Politicians, public figures, political rallies or protests, even organic or press photos of Pyle products in use. They imply endorsement, raise publicity-rights issues, and press images are licensed only for editorial use.
 
 ---
 
