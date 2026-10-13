@@ -1,7 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
   <title>Pulse of Play - Playful: Yellow on Cream</title>
+  <defs><clipPath id="bleed"><rect width="1000" height="1000"/></clipPath></defs>
   <rect width="1000" height="1000" fill="#FBFADC"/>
-  <g fill="none" stroke="#FBEF54" stroke-width="30">
-    <circle cx="500" cy="500" r="30"/> <circle cx="500" cy="500" r="90"/> <circle cx="500" cy="500" r="150"/> <circle cx="500" cy="500" r="210"/> <circle cx="500" cy="500" r="270"/> <circle cx="500" cy="500" r="330"/> <circle cx="500" cy="500" r="390"/> <circle cx="500" cy="500" r="450"/>
+  <g clip-path="url(#bleed)" fill="none" stroke="#FBEF54" stroke-width="20">
+    <circle cx="500" cy="500" r="20"/>
+    <circle cx="500" cy="500" r="60"/>
+    <circle cx="500" cy="500" r="100"/>
+    <circle cx="500" cy="500" r="140"/>
+    <circle cx="500" cy="500" r="180"/>
+    <circle cx="500" cy="500" r="220"/>
+    <circle cx="500" cy="500" r="260"/>
+    <circle cx="500" cy="500" r="300"/>
+    <circle cx="500" cy="500" r="340"/>
+    <circle cx="500" cy="500" r="380"/>
+    <circle cx="500" cy="500" r="420"/>
+    <circle cx="500" cy="500" r="460"/>
+    <circle cx="500" cy="500" r="500"/>
+    <circle cx="500" cy="500" r="540"/>
+    <circle cx="500" cy="500" r="580"/>
+    <circle cx="500" cy="500" r="620"/>
+    <circle cx="500" cy="500" r="660"/>
+    <circle cx="500" cy="500" r="700"/>
+    <circle cx="500" cy="500" r="740"/>
+    <circle cx="500" cy="500" r="780"/>
   </g>
 </svg>
