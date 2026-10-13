@@ -3,6 +3,8 @@
 **Delivered by 48HourDigital · Version 1.0 · October 2026**
 **Source of truth:** *Pyle USA — Visual Brand Identity Refresh* (Jan 2025, "Visual Brand New" direction only). The "Visual Brand Now" material (source pp. 7–12) and "The Packaging Now" (source p. 62) are deprecated and must not be reproduced.
 
+> **Note (v1.1):** The HTML/PDF slide deck carries a condensed, designer-facing edition of Section 3 and adds slides for iconography, trust badges, PRO/VINTAGE, digital touchpoints and US retail co-branding. This file keeps the full long-form reference wording.
+
 ---
 
 ## How to use this copy deck
