@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
-  <title>Pulse of Play - Hero: Red on Maroon</title>
+  <title>Pulse of Play - Hero: Red on Deep Maroon</title>
   <defs><clipPath id="bleed"><rect width="1000" height="1000"/></clipPath></defs>
-  <rect width="1000" height="1000" fill="#5A181C"/>
+  <rect width="1000" height="1000" fill="#2D1012"/>
   <g clip-path="url(#bleed)" fill="none" stroke="#EF3346" stroke-width="20">
     <circle cx="500" cy="500" r="20"/>
     <circle cx="500" cy="500" r="60"/>
